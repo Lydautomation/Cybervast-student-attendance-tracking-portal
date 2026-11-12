@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybervast Student Attendance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>CYBERVAST</h1>
+            <p>Student Attendance Portal</p>
+        </header>
+
+        <main>
+
+            <h2>Record Attendance</h2>
+            <p class="description">
+                Select your course and training session to load students.
+            </p>
+
+            <form id="attendanceForm">
+
+                <label for="course">Select Course</label>
+                <select id="course" required>
+                    <option value="">Choose a course</option>
+                </select>
+
+                <label for="session">Training Session</label>
+                <select id="session" required>
+                    <option value="">Choose a training session</option>
+                </select>
+
+                <button type="button" id="loadStudents">
+                    Load Students
+                </button>
+
+            </form>
+
+            <div id="studentSection" hidden>
+
+                <h3>Student Attendance</h3>
+
+                <div id="studentList"></div>
+
+                <button type="button" id="submitAttendance">
+                    Submit Attendance
+                </button>
+
+            </div>
+
+            <p id="message"></p>
+
+        </main>
+
+        <footer>
+            <p>Cybervast Student Attendance System</p>
+        </footer>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
