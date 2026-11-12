@@ -3,23 +3,30 @@
 // CYBERVAST STUDENT ATTENDANCE PORTAL
 // ======================================
 
+
 // 1. N8N WEBHOOK URLS
-// Replace these with the actual production URLs later.
 
 const GET_STUDENTS_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook-test/cybervast-load-students";
+
 const SUBMIT_ATTENDANCE_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook-test/cybervast-submit-attendance";
 
 
-// 2. COURSE OPTIONS
-// Replace or add courses using Cybervast's official course names.
+// 2. CYBERVAST COURSE OPTIONS
 
 const courses = [
+    "Cybersecurity",
     "AI Automation",
+    "Front-End Development",
+    "UI/UX Design",
+    "Virtual Assistants",
+    "Project Management",
+    "Digital Marketing",
     "Data Analysis"
 ];
 
 
 // 3. TRAINING SESSION OPTIONS
+// 12 weeks × 3 classes = 36 sessions
 
 const sessions = [];
 
@@ -65,7 +72,7 @@ attendanceForm.insertBefore(tutorLabel, loadButton);
 attendanceForm.insertBefore(tutorInput, loadButton);
 
 
-// 6. POPULATE DROPDOWNS
+// 6. POPULATE COURSE DROPDOWN
 
 courses.forEach(course => {
     const option = document.createElement("option");
@@ -74,15 +81,46 @@ courses.forEach(course => {
     courseSelect.appendChild(option);
 });
 
-sessions.forEach(session => {
-    const option = document.createElement("option");
-    option.value = session;
-    option.textContent = session;
-    sessionSelect.appendChild(option);
-});
+
+// 7. POPULATE SESSION DROPDOWN
+
+function populateSessions(nextSession = "") {
+
+    sessionSelect.innerHTML = "";
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select Training Session";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+
+    sessionSelect.appendChild(placeholder);
+
+    sessions.forEach(session => {
+
+        const option = document.createElement("option");
+        option.value = session;
+
+        if (session === nextSession) {
+            option.textContent = `${session} (Next Session)`;
+        } else {
+            option.textContent = session;
+        }
+
+        sessionSelect.appendChild(option);
+
+    });
+
+    if (nextSession && sessions.includes(nextSession)) {
+        sessionSelect.value = nextSession;
+    }
+
+}
+
+populateSessions();
 
 
-// 7. DISPLAY MESSAGES
+// 8. DISPLAY MESSAGES
 
 function showMessage(text, isError = false) {
     message.textContent = text;
@@ -90,16 +128,15 @@ function showMessage(text, isError = false) {
 }
 
 
-// 8. LOAD STUDENTS FROM N8N
+// 9. LOAD STUDENTS AND NEXT UNRECORDED SESSION
 
 loadButton.addEventListener("click", async () => {
 
     const course = courseSelect.value;
-    const trainingSession = sessionSelect.value;
     const tutor = tutorInput.value.trim();
 
-    if (!course || !trainingSession || !tutor) {
-        showMessage("Please select a course, training session and enter your name.", true);
+    if (!course || !tutor) {
+        showMessage("Please select a course and enter your name.", true);
         return;
     }
 
@@ -121,7 +158,6 @@ loadButton.addEventListener("click", async () => {
             },
             body: JSON.stringify({
                 course: course,
-                trainingSession: trainingSession,
                 tutor: tutor
             })
         });
@@ -144,9 +180,27 @@ loadButton.addEventListener("click", async () => {
             return;
         }
 
-        displayStudents(students);
+        // Select the next unrecorded session returned by n8n.
+        if (data.nextSession && sessions.includes(data.nextSession)) {
 
-        showMessage(`${students.length} students loaded successfully.`);
+            populateSessions(data.nextSession);
+
+            showMessage(
+                `${students.length} students loaded. Next unrecorded session: ${data.nextSession}.`
+            );
+
+        } else {
+
+            populateSessions();
+
+            showMessage(
+                `${students.length} students loaded. Please select a training session.`,
+                true
+            );
+
+        }
+
+        displayStudents(students);
 
     } catch (error) {
 
@@ -163,7 +217,7 @@ loadButton.addEventListener("click", async () => {
 });
 
 
-// 9. DISPLAY RETRIEVED STUDENTS
+// 10. DISPLAY RETRIEVED STUDENTS
 
 let loadedStudents = [];
 
@@ -219,13 +273,18 @@ function displayStudents(students) {
 }
 
 
-// 10. SUBMIT ATTENDANCE TO N8N
+// 11. SUBMIT ATTENDANCE TO N8N
 
 submitButton.addEventListener("click", async () => {
 
     const course = courseSelect.value;
     const trainingSession = sessionSelect.value;
     const tutor = tutorInput.value.trim();
+
+    if (!course || !trainingSession || !tutor) {
+        showMessage("Please select a course, training session and enter your name.", true);
+        return;
+    }
 
     if (loadedStudents.length === 0) {
         showMessage("Please load students first.", true);
