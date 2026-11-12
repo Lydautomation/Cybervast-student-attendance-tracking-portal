@@ -21,7 +21,7 @@
 
             <h2>Record Attendance</h2>
             <p class="description">
-                Select your course and training session to load students.
+                Select your course and enter your name, then load students to view the recommended next training session.
             </p>
 
             <form id="attendanceForm">
@@ -31,10 +31,10 @@
                     <option value="">Choose a course</option>
                 </select>
 
-                <div id="sessionContainer" hidden>
+                <div id="sessionContainer">
                     <label for="session">Training Session</label>
-                    <select id="session" required>
-                        <option value="">Choose a training session</option>
+                    <select id="session" required disabled>
+                        <option value="">Load students to view the recommended next training session.</option>
                     </select>
                 </div>
 
