@@ -2,9 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --purple: #54218F;
-    --deep-purple: #35105F;
-    --light-purple: #F5F0FC;
+    --purple: #A020F0;
+    --deep-purple: #6500A8;
+    --light-purple: #F5EDFF;
     --gold: #F5C542;
     --dark-gold: #DDAA16;
     --white: #FFFFFF;
@@ -35,30 +35,33 @@ body {
     background: var(--white);
     border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 15px 45px rgba(53, 16, 95, 0.10);
+    box-shadow: 0 15px 45px rgba(101, 0, 168, 0.10);
 }
 
 /* HEADER */
 
 header {
-    background: linear-gradient(135deg, #35105F, #54218F, #7135A9);
+    background: linear-gradient(135deg, #000000, #6500A8, #A020F0);
     color: var(--white);
     text-align: center;
-    padding: 42px 25px 38px;
+    padding: 35px 25px 32px;
     position: relative;
     border-bottom: 5px solid var(--gold);
 }
 
-header h1 {
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: 3px;
+.cybervast-logo {
+    display: block;
+    width: 190px;
+    max-width: 80%;
+    height: auto;
+    margin: 0 auto;
+    object-fit: contain;
 }
 
 header p {
-    margin-top: 10px;
+    margin-top: 12px;
     font-size: 14px;
-    color: #E9DDF8;
+    color: #F5EDFF;
     letter-spacing: 0.5px;
 }
 
@@ -106,7 +109,7 @@ select {
 
 select:focus {
     border-color: var(--purple);
-    box-shadow: 0 0 0 3px rgba(84, 33, 143, 0.10);
+    box-shadow: 0 0 0 3px rgba(160, 32, 240, 0.10);
 }
 
 /* BUTTONS */
@@ -129,7 +132,7 @@ button {
 button:hover {
     background: var(--deep-purple);
     transform: translateY(-1px);
-    box-shadow: 0 6px 15px rgba(84, 33, 143, 0.18);
+    box-shadow: 0 6px 15px rgba(101, 0, 168, 0.18);
 }
 
 button:disabled {
@@ -161,7 +164,7 @@ button:disabled {
 }
 
 .student-card:hover {
-    box-shadow: 0 5px 15px rgba(53, 16, 95, 0.06);
+    box-shadow: 0 5px 15px rgba(101, 0, 168, 0.06);
 }
 
 .student-name {
@@ -228,11 +231,11 @@ footer {
     }
 
     header {
-        padding: 32px 18px;
+        padding: 30px 18px;
     }
 
-    header h1 {
-        font-size: 25px;
+    .cybervast-logo {
+        width: 160px;
     }
 
     main {
