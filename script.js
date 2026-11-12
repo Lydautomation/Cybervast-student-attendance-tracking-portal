@@ -7,7 +7,7 @@
 // Replace these with the actual production URLs later.
 
 const GET_STUDENTS_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook-test/cybervast-load-students";
-const SUBMIT_ATTENDANCE_WEBHOOK = "PASTE_SECOND_N8N_WEBHOOK_URL_HERE";
+const SUBMIT_ATTENDANCE_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook-test/cybervast-submit-attendance";
 
 
 // 2. COURSE OPTIONS
