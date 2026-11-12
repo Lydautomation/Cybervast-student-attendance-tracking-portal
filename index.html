@@ -31,10 +31,12 @@
                     <option value="">Choose a course</option>
                 </select>
 
-                <label for="session">Training Session</label>
-                <select id="session" required>
-                    <option value="">Choose a training session</option>
-                </select>
+                <div id="sessionContainer" hidden>
+                    <label for="session">Training Session</label>
+                    <select id="session" required>
+                        <option value="">Choose a training session</option>
+                    </select>
+                </div>
 
                 <button type="button" id="loadStudents">
                     Load Students
