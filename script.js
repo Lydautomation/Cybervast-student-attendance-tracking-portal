@@ -26,7 +26,6 @@ const courses = [
 
 
 // 3. TRAINING SESSION OPTIONS
-// 12 weeks × 3 classes = 36 sessions
 
 const sessions = [];
 
@@ -83,7 +82,22 @@ courses.forEach(course => {
 });
 
 
-// 7. POPULATE SESSION DROPDOWN
+// 7. SESSION DROPDOWN FUNCTIONS
+
+function resetSessionDropdown() {
+    sessionSelect.innerHTML = "";
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent =
+        "Load students to view the recommended next training session.";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+
+    sessionSelect.appendChild(placeholder);
+    sessionSelect.disabled = true;
+}
+
 
 function populateSessions(nextSession = "") {
 
@@ -103,7 +117,8 @@ function populateSessions(nextSession = "") {
         option.value = session;
 
         if (session === nextSession) {
-            option.textContent = `${session} (Recommended Next Session)`;
+            option.textContent =
+                `${session} (Recommended Next Session)`;
         } else {
             option.textContent = session;
         }
@@ -116,15 +131,16 @@ function populateSessions(nextSession = "") {
         sessionSelect.value = nextSession;
     }
 
+    sessionSelect.disabled = false;
 }
 
 
 // 8. INITIAL INTERFACE STATE
 
-sessionContainer.hidden = true;
+sessionContainer.hidden = false;
 studentSection.hidden = true;
 
-populateSessions();
+resetSessionDropdown();
 
 
 // 9. DISPLAY MESSAGES
@@ -139,13 +155,13 @@ function showMessage(text, isError = false) {
 
 courseSelect.addEventListener("change", () => {
 
-    sessionContainer.hidden = true;
+    sessionContainer.hidden = false;
     studentSection.hidden = true;
 
     studentList.innerHTML = "";
     loadedStudents = [];
 
-    populateSessions();
+    resetSessionDropdown();
 
     showMessage("");
 
@@ -162,25 +178,31 @@ loadButton.addEventListener("click", async () => {
     const tutor = tutorInput.value.trim();
 
     if (!course || !tutor) {
-        showMessage("Please select a course and enter your name.", true);
+        showMessage(
+            "Please select a course and enter your name.",
+            true
+        );
         return;
     }
 
     if (GET_STUDENTS_WEBHOOK.includes("PASTE_")) {
-        showMessage("The student retrieval Webhook has not been connected yet.", true);
+        showMessage(
+            "The student retrieval Webhook has not been connected yet.",
+            true
+        );
         return;
     }
 
     loadButton.disabled = true;
     loadButton.textContent = "Loading students...";
 
-    sessionContainer.hidden = true;
+    sessionContainer.hidden = false;
     studentSection.hidden = true;
 
     studentList.innerHTML = "";
     loadedStudents = [];
 
-    populateSessions();
+    resetSessionDropdown();
 
     showMessage("Retrieving student records...");
 
@@ -206,27 +228,48 @@ loadButton.addEventListener("click", async () => {
         const students = data.students;
 
         if (!Array.isArray(students)) {
-            throw new Error("The response did not contain a valid student list.");
+            throw new Error(
+                "The response did not contain a valid student list."
+            );
         }
 
         if (students.length === 0) {
-            showMessage("No students were found for this course.", true);
+            showMessage(
+                "No students were found for this course.",
+                true
+            );
             return;
         }
 
-        // Display the next unrecorded session if supplied by n8n.
+        // Handle the recommended next session.
 
         if (data.nextSession && sessions.includes(data.nextSession)) {
+
             populateSessions(data.nextSession);
+
+        } else if (data.nextSession === null) {
+
+            sessionSelect.innerHTML = "";
+
+            const completedOption = document.createElement("option");
+            completedOption.value = "";
+            completedOption.textContent =
+                "All training sessions have been recorded.";
+            completedOption.disabled = true;
+            completedOption.selected = true;
+
+            sessionSelect.appendChild(completedOption);
+            sessionSelect.disabled = true;
+
         } else {
+
             populateSessions();
+
         }
 
         // Display student records.
 
         displayStudents(students);
-
-        // Reveal the session field in its original position.
 
         sessionContainer.hidden = false;
 
@@ -234,6 +277,12 @@ loadButton.addEventListener("click", async () => {
 
             showMessage(
                 `${students.length} students loaded successfully. ${data.nextSession} is the recommended next session.`
+            );
+
+        } else if (data.nextSession === null) {
+
+            showMessage(
+                `${students.length} students loaded successfully. All 36 training sessions have been recorded.`
             );
 
         } else {
@@ -247,6 +296,8 @@ loadButton.addEventListener("click", async () => {
     } catch (error) {
 
         console.error(error);
+
+        resetSessionDropdown();
 
         showMessage(
             error.message || "Something went wrong while loading students.",
@@ -347,7 +398,10 @@ submitButton.addEventListener("click", async () => {
         );
 
         if (!selected) {
-            showMessage("Please mark attendance for every student.", true);
+            showMessage(
+                "Please mark attendance for every student.",
+                true
+            );
             return;
         }
 
@@ -367,7 +421,10 @@ submitButton.addEventListener("click", async () => {
     }
 
     if (SUBMIT_ATTENDANCE_WEBHOOK.includes("PASTE_")) {
-        showMessage("The attendance submission Webhook has not been connected yet.", true);
+        showMessage(
+            "The attendance submission Webhook has not been connected yet.",
+            true
+        );
         return;
     }
 
@@ -396,12 +453,15 @@ submitButton.addEventListener("click", async () => {
         showMessage("Attendance submitted successfully!");
 
         studentSection.hidden = true;
-        sessionContainer.hidden = true;
 
         studentList.innerHTML = "";
         loadedStudents = [];
 
-        populateSessions();
+        // Require the tutor to load students again
+        // before viewing the next recommended session.
+
+        sessionContainer.hidden = false;
+        resetSessionDropdown();
 
     } catch (error) {
 
