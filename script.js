@@ -6,9 +6,9 @@
 
 // 1. N8N WEBHOOK URLS
 
-const GET_STUDENTS_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook-test/cybervast-load-students";
+const GET_STUDENTS_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook/cybervast-load-students";
 
-const SUBMIT_ATTENDANCE_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook-test/cybervast-submit-attendance";
+const SUBMIT_ATTENDANCE_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook/cybervast-submit-attendance";
 
 
 // 2. CYBERVAST COURSE OPTIONS
