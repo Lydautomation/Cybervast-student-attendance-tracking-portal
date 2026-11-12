@@ -6,7 +6,7 @@
 // 1. N8N WEBHOOK URLS
 // Replace these with the actual production URLs later.
 
-const GET_STUDENTS_WEBHOOK = "PASTE_FIRST_N8N_WEBHOOK_URL_HERE";
+const GET_STUDENTS_WEBHOOK = "https://lydautomation-n8n.duckdns.org/webhook-test/cybervast-load-students";
 const SUBMIT_ATTENDANCE_WEBHOOK = "PASTE_SECOND_N8N_WEBHOOK_URL_HERE";
 
 
