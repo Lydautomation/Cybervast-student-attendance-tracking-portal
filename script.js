@@ -117,7 +117,7 @@ loadButton.addEventListener("click", async () => {
         const response = await fetch(GET_STUDENTS_WEBHOOK, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "text/plain"
             },
             body: JSON.stringify({
                 course: course,
