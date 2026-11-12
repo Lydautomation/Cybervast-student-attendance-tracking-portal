@@ -41,6 +41,7 @@ for (let week = 1; week <= 12; week++) {
 
 const courseSelect = document.getElementById("course");
 const sessionSelect = document.getElementById("session");
+const sessionContainer = document.getElementById("sessionContainer");
 const loadButton = document.getElementById("loadStudents");
 const submitButton = document.getElementById("submitAttendance");
 const studentSection = document.getElementById("studentSection");
@@ -102,7 +103,7 @@ function populateSessions(nextSession = "") {
         option.value = session;
 
         if (session === nextSession) {
-            option.textContent = `${session} (Next Session)`;
+            option.textContent = `${session} (Recommended Next Session)`;
         } else {
             option.textContent = session;
         }
@@ -117,10 +118,16 @@ function populateSessions(nextSession = "") {
 
 }
 
+
+// 8. INITIAL INTERFACE STATE
+
+sessionContainer.hidden = true;
+studentSection.hidden = true;
+
 populateSessions();
 
 
-// 8. DISPLAY MESSAGES
+// 9. DISPLAY MESSAGES
 
 function showMessage(text, isError = false) {
     message.textContent = text;
@@ -128,7 +135,26 @@ function showMessage(text, isError = false) {
 }
 
 
-// 9. LOAD STUDENTS AND NEXT UNRECORDED SESSION
+// 10. RESET WHEN COURSE CHANGES
+
+courseSelect.addEventListener("change", () => {
+
+    sessionContainer.hidden = true;
+    studentSection.hidden = true;
+
+    studentList.innerHTML = "";
+    loadedStudents = [];
+
+    populateSessions();
+
+    showMessage("");
+
+});
+
+
+// 11. LOAD STUDENTS AND NEXT UNRECORDED SESSION
+
+let loadedStudents = [];
 
 loadButton.addEventListener("click", async () => {
 
@@ -147,6 +173,15 @@ loadButton.addEventListener("click", async () => {
 
     loadButton.disabled = true;
     loadButton.textContent = "Loading students...";
+
+    sessionContainer.hidden = true;
+    studentSection.hidden = true;
+
+    studentList.innerHTML = "";
+    loadedStudents = [];
+
+    populateSessions();
+
     showMessage("Retrieving student records...");
 
     try {
@@ -175,37 +210,48 @@ loadButton.addEventListener("click", async () => {
         }
 
         if (students.length === 0) {
-            studentSection.hidden = true;
             showMessage("No students were found for this course.", true);
             return;
         }
 
-        // Select the next unrecorded session returned by n8n.
+        // Display the next unrecorded session if supplied by n8n.
+
+        if (data.nextSession && sessions.includes(data.nextSession)) {
+            populateSessions(data.nextSession);
+        } else {
+            populateSessions();
+        }
+
+        // Display student records.
+
+        displayStudents(students);
+
+        // Reveal the session field in its original position.
+
+        sessionContainer.hidden = false;
+
         if (data.nextSession && sessions.includes(data.nextSession)) {
 
-            populateSessions(data.nextSession);
-
             showMessage(
-                `${students.length} students loaded. Next unrecorded session: ${data.nextSession}.`
+                `${students.length} students loaded successfully. ${data.nextSession} is the recommended next session.`
             );
 
         } else {
 
-            populateSessions();
-
             showMessage(
-                `${students.length} students loaded. Please select a training session.`,
-                true
+                `${students.length} students loaded successfully. Please select a training session.`
             );
 
         }
 
-        displayStudents(students);
-
     } catch (error) {
 
         console.error(error);
-        showMessage(error.message || "Something went wrong while loading students.", true);
+
+        showMessage(
+            error.message || "Something went wrong while loading students.",
+            true
+        );
 
     } finally {
 
@@ -217,9 +263,7 @@ loadButton.addEventListener("click", async () => {
 });
 
 
-// 10. DISPLAY RETRIEVED STUDENTS
-
-let loadedStudents = [];
+// 12. DISPLAY RETRIEVED STUDENTS
 
 function displayStudents(students) {
 
@@ -273,7 +317,7 @@ function displayStudents(students) {
 }
 
 
-// 11. SUBMIT ATTENDANCE TO N8N
+// 13. SUBMIT ATTENDANCE TO N8N
 
 submitButton.addEventListener("click", async () => {
 
@@ -281,8 +325,11 @@ submitButton.addEventListener("click", async () => {
     const trainingSession = sessionSelect.value;
     const tutor = tutorInput.value.trim();
 
-    if (!course || !trainingSession || !tutor) {
-        showMessage("Please select a course, training session and enter your name.", true);
+    if (!course || !tutor || !trainingSession) {
+        showMessage(
+            "Please select a course, enter your name and select a training session.",
+            true
+        );
         return;
     }
 
@@ -349,13 +396,21 @@ submitButton.addEventListener("click", async () => {
         showMessage("Attendance submitted successfully!");
 
         studentSection.hidden = true;
+        sessionContainer.hidden = true;
+
         studentList.innerHTML = "";
         loadedStudents = [];
+
+        populateSessions();
 
     } catch (error) {
 
         console.error(error);
-        showMessage(error.message || "Unable to submit attendance.", true);
+
+        showMessage(
+            error.message || "Unable to submit attendance.",
+            true
+        );
 
     } finally {
 
