@@ -151,7 +151,13 @@ function showMessage(text, isError = false) {
 }
 
 
-// 10. RESET WHEN COURSE CHANGES
+// 10. TRACK LOADED STUDENTS AND ACTIVE COHORT
+
+let loadedStudents = [];
+let activeCohort = null;
+
+
+// 11. RESET WHEN COURSE CHANGES
 
 courseSelect.addEventListener("change", () => {
 
@@ -160,6 +166,7 @@ courseSelect.addEventListener("change", () => {
 
     studentList.innerHTML = "";
     loadedStudents = [];
+    activeCohort = null;
 
     resetSessionDropdown();
 
@@ -168,9 +175,7 @@ courseSelect.addEventListener("change", () => {
 });
 
 
-// 11. LOAD STUDENTS AND NEXT UNRECORDED SESSION
-
-let loadedStudents = [];
+// 12. LOAD STUDENTS AND NEXT UNRECORDED SESSION
 
 loadButton.addEventListener("click", async () => {
 
@@ -201,6 +206,7 @@ loadButton.addEventListener("click", async () => {
 
     studentList.innerHTML = "";
     loadedStudents = [];
+    activeCohort = null;
 
     resetSessionDropdown();
 
@@ -241,6 +247,21 @@ loadButton.addEventListener("click", async () => {
             return;
         }
 
+        // Store the active cohort returned by Workflow 2A.
+        // Fall back to the cohort on the first student if needed.
+
+        activeCohort = data.cohort ?? students[0]?.cohort ?? null;
+
+        if (
+            activeCohort === null ||
+            activeCohort === undefined ||
+            String(activeCohort).trim() === ""
+        ) {
+            throw new Error(
+                "The active cohort was not included in the student response."
+            );
+        }
+
         // Handle the recommended next session.
 
         if (data.nextSession && sessions.includes(data.nextSession)) {
@@ -276,19 +297,19 @@ loadButton.addEventListener("click", async () => {
         if (data.nextSession && sessions.includes(data.nextSession)) {
 
             showMessage(
-                `${students.length} students loaded successfully. ${data.nextSession} is the recommended next session.`
+                `${students.length} students loaded successfully for Cohort ${activeCohort}. ${data.nextSession} is the recommended next session.`
             );
 
         } else if (data.nextSession === null) {
 
             showMessage(
-                `${students.length} students loaded successfully. All 36 training sessions have been recorded.`
+                `${students.length} students loaded successfully for Cohort ${activeCohort}. All 36 training sessions have been recorded.`
             );
 
         } else {
 
             showMessage(
-                `${students.length} students loaded successfully. Please select a training session.`
+                `${students.length} students loaded successfully for Cohort ${activeCohort}. Please select a training session.`
             );
 
         }
@@ -314,7 +335,7 @@ loadButton.addEventListener("click", async () => {
 });
 
 
-// 12. DISPLAY RETRIEVED STUDENTS
+// 13. DISPLAY RETRIEVED STUDENTS
 
 function displayStudents(students) {
 
@@ -368,7 +389,7 @@ function displayStudents(students) {
 }
 
 
-// 13. SUBMIT ATTENDANCE TO N8N
+// 14. SUBMIT ATTENDANCE TO N8N
 
 submitButton.addEventListener("click", async () => {
 
@@ -386,6 +407,14 @@ submitButton.addEventListener("click", async () => {
 
     if (loadedStudents.length === 0) {
         showMessage("Please load students first.", true);
+        return;
+    }
+
+    if (activeCohort === null || activeCohort === undefined) {
+        showMessage(
+            "Please load the students again so the active cohort can be identified.",
+            true
+        );
         return;
     }
 
@@ -413,6 +442,7 @@ submitButton.addEventListener("click", async () => {
             emailAddress: student.emailAddress,
             phoneNumber: student.phoneNumber,
             course: course,
+            cohort: student.cohort ?? activeCohort,
             trainingSession: trainingSession,
             attendanceStatus: selected.value,
             tutor: tutor
@@ -440,6 +470,7 @@ submitButton.addEventListener("click", async () => {
             },
             body: JSON.stringify({
                 course: course,
+                cohort: activeCohort,
                 trainingSession: trainingSession,
                 tutor: tutor,
                 attendanceRecords: attendanceRecords
@@ -456,6 +487,7 @@ submitButton.addEventListener("click", async () => {
 
         studentList.innerHTML = "";
         loadedStudents = [];
+        activeCohort = null;
 
         // Require the tutor to load students again
         // before viewing the next recommended session.
